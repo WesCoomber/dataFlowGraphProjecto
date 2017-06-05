@@ -10,13 +10,13 @@ instrNodes = []
 
 with open('smallCleanedSlice.txt') as oldfile:
     for line in oldfile:
-    	tempLine = line.split()
-    	instrNodes.append(tempLine[1] + '-' + tempLine[2])
+        tempLine = line.split()
+        instrNodes.append(tempLine[1] + '-' + tempLine[2])
 
 i=0
 for x in instrNodes:
-	instrNodes[i] = x.replace("#", "")
-	i += 1
+    instrNodes[i] = x.replace("#", "")
+    i += 1
 instrNodesString = ''.join(instrNodes)
 print('Done! Instruction Nodes List Size is : ') #+ instrNodesString
 #print(instrNodes)
@@ -25,28 +25,28 @@ print(len(instrNodes))
 
 pattern = '\s+(\S+)\s'
 with open('smallCleanedSlice.txt') as oldfile:
-	for line in oldfile:
-		prepline = line.replace("#\S*", " r1 ")
-		prepline = prepline.replace("[SLICE_INFO]", " r2 ")
-		prepline = prepline.replace("[SLICE_INFO]", " r2 ")
-		prepline = prepline.replace("[SLICE]", " r3 ")
-		prepline = prepline.replace("\t", " \t ")
-		prepline = prepline.rstrip("\t")
-		prepline = re.sub(r'(\s)#\w+', r'\1', prepline)
-		prepline = re.sub(r'.*SLICE', '', prepline)
-		prepline = re.sub(r'(\s)SLICE\s+', r'\1', prepline)
-		splitList = re.split("r1 | r2 | \t | r3 ", prepline)
+    for line in oldfile:
+        prepline = line.replace("#\S*", " r1 ")
+        prepline = prepline.replace("[SLICE_INFO]", " r2 ")
+        prepline = prepline.replace("[SLICE_INFO]", " r2 ")
+        prepline = prepline.replace("[SLICE]", " r3 ")
+        prepline = prepline.replace("\t", " \t ")
+        prepline = prepline.rstrip("\t")
+        prepline = re.sub(r'(\s)#\w+', r'\1', prepline)
+        prepline = re.sub(r'.*SLICE', '', prepline)
+        prepline = re.sub(r'(\s)SLICE\s+', r'\1', prepline)
+        splitList = re.split("r1 | r2 | \t | r3 ", prepline)
 
-		if (len(splitList) >=2):
-			tempEdge = splitList[1]
-			tempEdge = tempEdge.lstrip()
-			#print tempEdges
-			#print len(splitList)	
-		else : 
-			tempEdge = splitList[0]	
-			#print ('hello: '+tempEdge)
-			
-		instrEdges.append(tempEdge)
+        if (len(splitList) >=2):
+            tempEdge = splitList[1]
+            tempEdge = tempEdge.lstrip()
+            #print tempEdges
+            #print len(splitList)   
+        else : 
+            tempEdge = splitList[0] 
+            #print ('hello: '+tempEdge)
+            
+        instrEdges.append(tempEdge)
 
 #str1 = ''.join(tempLine)
 
@@ -57,8 +57,8 @@ j = 0
 
 #give unique id number for each instruction based on its line number (starting at 0)
 '''for x in instrNodes:
-	instrNodes[j] = str(j)+ '-' +instrNodes[j]
-	j+=1
+    instrNodes[j] = str(j)+ '-' +instrNodes[j]
+    j+=1
 '''
 
 instrNodesString = ''.join(instrEdges)
@@ -87,25 +87,22 @@ print("first node(instr): and its edges(operands): " + 'b7ff5c05-cmp: '+str(new_
 flagEnterKeys = 1
 
 while (flagEnterKeys == 1):
-	input_var = raw_input('Enter a key (b7ff5c05-cmp for the 1st instruction cmp in the slice): TYPE EXIT TO End.\n')
-	
-	if (input_var in new_dict):
-		print("Operands for " + input_var + " are: " + str(new_dict[input_var]) + ".\n")
-		break
-	if ((input_var == "exit") or (input_var == ",exit,")):
-		flagEnterKeys = 0;
-		break
-	else :
-		print("ERROR! Please enter in a valid key for the instrNodes, instrEdges dictionary.")	
+    input_var = raw_input('Enter a key (b7ff5c05-cmp for the 1st instruction cmp in the slice): TYPE EXIT TO End.\n')
+    
+    if (input_var in new_dict):
+        print("Operands for " + input_var + " are: " + str(new_dict[input_var]) + ".\n")
+        break
+    if ((input_var == "exit") or (input_var == ",exit,")):
+        flagEnterKeys = 0;
+        break
+    else :
+        print("ERROR! Please enter in a valid key for the instrNodes, instrEdges dictionary.")  
 
-	
-	
+    
+    
 ##New Graphviz-dot code here 
 graph = functools.partial(gv.Graph, format='svg')
 digraph = functools.partial(gv.Digraph, format='svg')
-
-testNodes = ['A', 'B', 'C', 'D', 'E', 'F']
-testEdges = ['AB', 'CD']
 
 datG = digraph()
 nodes = instrNodes
@@ -135,47 +132,101 @@ newestAF = ''
 newestCF = ''
 newestPF = ''
 
+# default values 'b7ff9999-cmp' in the 32-bit 4word registers
+EAX = ['R','R','R','R']
+EDI = ['R','R','R','R']
+
+
+
+def modifyAX(thirdWord, fourthWord):
+    EAX[0:2] = [thirdWord, fourthWord]
+
+def modifyEAX(firstWord, secondWord, thirdWord, fourthWord):
+    EAX[0:4] = [firstWord, secondWord, thirdWord, fourthWord]
+
+def modifyEDI(firstWord, secondWord, thirdWord, fourthWord):
+    EDI[0:4] = [firstWord, secondWord, thirdWord, fourthWord]
+
+def modifyDI(thirdWord, fourthWord):
+    EDI[0:2] = [thirdWord, fourthWord]
+
+
+
+
 datG.node('R', 'Root')
 #datG.edge('R', '0-cmp', label='eax')
 #datG.edge('R', '0-cmp', label='0xfffff001' )
 datG.node('Out', 'Output')
 pattern = re.compile("^\s+|\s*,\s*|\s+$")
 for idx, c in enumerate(instrEdges):
-	splitStr = [a for a in pattern.split(c) if a]
+    splitStr = [a for a in pattern.split(c) if a]
 
-	for b in splitStr:
-		tempNodeStr = instrNodes[(idx)]
-		
-		datG.edge('R', tempNodeStr, label=b)
-		if "cmp" in tempNodeStr:
-			statusFlags = ['OF', 'SF', 'ZF', 'AF', 'CF', 'PF']
-	#iterate through the flags outputted (affected) by the instruction and do both:
-	#add an edge from the instruction to generic 'OutputNode'
-	#update the flags with newest most recent values
-	for idy, c in enumerate(statusFlags):
-		datG.edge(tempNodeStr, 'Out', label=tempNodeStr + ',' + str(c))
+    for idz, b in enumerate(splitStr):
+        tempNodeStr = instrNodes[(idx)]
 
-		if c == "OF":
-			newestOF = tempNodeStr + '-' + str(c)
-		if c == "SF":
-			newestSF = tempNodeStr + '-' + str(c)
-		if c == "ZF":
-			newestZF = tempNodeStr + '-' + str(c)
-		if c == "AF":
-			newestAF = tempNodeStr + '-' + str(c)
-		if c == "CF":
-			newestCF = tempNodeStr + '-' + str(c)
-		if c == "PF":
-			newestPF = tempNodeStr + '-' + str(c)
-			
-	statusFlags = [] 
+        if splitStr[idz] == "eax":
+            for ido, k in enumerate(EAX):
+                datG.edge(k, tempNodeStr, label=k)
+                #datG.edge(k, tempNodeStr, label='k')
+        if splitStr[idz] == "edi":
+            for ido, k in enumerate(EDI):
+                datG.edge(k, tempNodeStr, label=k) 
+                #datG.edge(k, tempNodeStr, label='k')
+        else:
+            datG.edge('R', tempNodeStr, label=b)
+            #datG.edge('R', tempNodeStr, label='b')
+
+        if "cmp" in tempNodeStr:
+            statusFlags = ['OF', 'SF', 'ZF', 'AF', 'CF', 'PF']
+            #if b == "edi":
+                # if src reg is eax
+                      
+                    
+        if "mov" in tempNodeStr:
+            print('mov detected.' + str(idz))
+            if idz == 0:
+                # if dest reg is edi
+                if b == "edi":
+                    # if src reg is eax
+                    if splitStr[1] == "eax":
+                        modifyEDI(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+                # if dest reg is eax
+                if b == "eax":
+                    # if src reg is edi
+                    if splitStr[1] == "edi":
+                        modifyEAX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+
+
+
+
+
+    #iterate through the flags outputted (affected) by the instruction and do both:
+    #add an edge from the instruction to generic 'OutputNode'
+    #update the flags with newest most recent values
+    for idy, c in enumerate(statusFlags):
+        datG.edge(tempNodeStr, 'Out', label=tempNodeStr + ',' + str(c))
+
+        if c == "OF":
+            newestOF = tempNodeStr + '-' + str(c)
+        if c == "SF":
+            newestSF = tempNodeStr + '-' + str(c)
+        if c == "ZF":
+            newestZF = tempNodeStr + '-' + str(c)
+        if c == "AF":
+            newestAF = tempNodeStr + '-' + str(c)
+        if c == "CF":
+            newestCF = tempNodeStr + '-' + str(c)
+        if c == "PF":
+            newestPF = tempNodeStr + '-' + str(c)
+            
+    statusFlags = [] 
 
 newFlagRegList = [newestOF, newestSF, newestZF, newestAF, newestCF, newestPF]
 
 '''
 for idx, c in enumerate(statusFlags):
-	tempNodeStr = instrNodes[(idx)]
-	datG.edge('b7ff5c05-cmp', 'Out', label=tempNodeStr + '-' + c)
+    tempNodeStr = instrNodes[(idx)]
+    datG.edge('b7ff5c05-cmp', 'Out', label=tempNodeStr + '-' + c)
 '''
 
 
@@ -185,7 +236,7 @@ add_nodes(datG)
 print(datG.source)
 
 src = Source(datG)
-src.render('test-output/holy-grenade.gv', view=True)
+src.render('test-output/dataFlowSliceWes1.gv', view=True)
 
 #some example graph code 
 '''
@@ -292,5 +343,5 @@ if __name__ == "__main__":
     print("Vertices of graph:")
     print(graph.vertices())
     print("Edges of graph:")
-    print(graph.edges())	
+    print(graph.edges())    
 '''
