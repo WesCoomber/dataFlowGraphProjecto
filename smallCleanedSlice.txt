@@ -13,3 +13,4 @@
 [SLICE] #b7ff3a11 #cmovz esi, edi	    [SLICE_INFO] ##src_regreg[10:1:4,9:0:4] #src_mem_value 49216
 [SLICE] #b7ff3a12 #cmovz ax, cx	    [SLICE_INFO] ##src_regreg[10:1:4,9:0:4] #src_mem_value 49216
 [SLICE] #b7ff3a13 #cmp ah, dl	    [SLICE_INFO] #src_regreg[10:1:1,9:0:1] #dst_reg_value 1, src_reg_value 1
+[SLICE] #b7ff3a14 #cmp ecx, eax	    [SLICE_INFO] #src_regreg[10:1:1,9:0:1] #dst_reg_value 1, src_reg_value 1
