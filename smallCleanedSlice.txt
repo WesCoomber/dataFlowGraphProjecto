@@ -1,6 +1,7 @@
 [SLICE] #b7ff5c05 #cmp eax, 0xfffff001	    [SLICE_INFO] #src_reg[10:1:4] #src_reg_value 512
 [SLICE] #b7fe3d14 #cmp eax, 0x33	    [SLICE_INFO] #src_reg[10:1:4] #src_reg_value 512
 [SLICE] #b7fe3d17 #mov edi, eax	    [SLICE_INFO] #src_reg[10:1:4] #src_reg_value 512
+[SLICE] #b7fe3d18 #mov al, eax	    [SLICE_INFO] #src_reg[10:1:4] #src_reg_value 512
 [SLICE] #b7fe3d19 #mov dword ptr [edx], eax	    [SLICE_INFO] #src_regreg[10:1:4,8:0:4] #dst_reg_value 512, src_reg_value 3221221340
 [SLICE] #b7ff6646 #mov eax, dword ptr [esi-0x8]	    [SLICE_INFO] #src_memreg[bfffefe0:1:4,4:0:4] #mem_value 1179403647, reg_value 3221221352
 [SLICE] #b7ff664c #cmp eax, ecx	    [SLICE_INFO] #src_regreg[10:1:4,9:0:4] #dst_reg_value 1179403647, src_reg_value 1179403647
@@ -9,4 +10,6 @@
 [SLICE] #b7ff6867 #cmp al, cl	    [SLICE_INFO] #src_regreg[10:1:1,9:0:1] #dst_reg_value 1, src_reg_value 1
 [SLICE] #b7ff686b #cmp ah, ch	    [SLICE_INFO] #src_regreg[10:1:1,9:0:1] #dst_reg_value 1, src_reg_value 1
 [SLICE] #b7ff686f #shr eax, 0x10	    [SLICE_INFO] #src_reg[10:1:4] #src_reg_value 50397441
-[SLICE] #b7ff3a11 #cmovz edi, esi	    [SLICE_INFO] ##src_regreg[10:1:4,9:0:4] #src_mem_value 49216
+[SLICE] #b7ff3a11 #cmovz esi, edi	    [SLICE_INFO] ##src_regreg[10:1:4,9:0:4] #src_mem_value 49216
+[SLICE] #b7ff3a12 #cmovz ax, cx	    [SLICE_INFO] ##src_regreg[10:1:4,9:0:4] #src_mem_value 49216
+[SLICE] #b7ff3a13 #cmp ah, dl	    [SLICE_INFO] #src_regreg[10:1:1,9:0:1] #dst_reg_value 1, src_reg_value 1

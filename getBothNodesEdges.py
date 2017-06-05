@@ -115,7 +115,7 @@ print(edges)
 
 def add_nodes(graph):
     for n in nodes:
-        graph.node(n)
+        graph.node(n, label = str(n) + '(' + str(new_dict[n]) + ')')
     return graph
 
 def add_edges(graph):
@@ -132,26 +132,114 @@ newestAF = ''
 newestCF = ''
 newestPF = ''
 
-# default values 'b7ff9999-cmp' in the 32-bit 4word registers
+# default values 'R' means edge from root node in the 32-bit 4word registers
+#Accumulator    Counter     Data    Base    Stack Pointer   Stack Base Pointer  Source  Destination
 EAX = ['R','R','R','R']
+ECX = ['R','R','R','R']
+EDI = ['R','R','R','R']
+EDX = ['R','R','R','R']
+EBX = ['R','R','R','R']
+ESP = ['R','R','R','R']
+EBP = ['R','R','R','R']
+ESI = ['R','R','R','R']
 EDI = ['R','R','R','R']
 
 
 
-def modifyAX(thirdWord, fourthWord):
-    EAX[0:2] = [thirdWord, fourthWord]
-
+#modify Eax register and its 16 and 8 bit versions
 def modifyEAX(firstWord, secondWord, thirdWord, fourthWord):
     EAX[0:4] = [firstWord, secondWord, thirdWord, fourthWord]
 
+def modifyAX(thirdWord, fourthWord):
+    EAX[2:4] = [thirdWord, fourthWord]
+
+def modifyAH(thirdWord):
+    EAX[2:3] = [thirdWord]
+
+def modifyAL(fourthWord):
+    EAX[3:4] = [fourthWord]    
+
+
+
+
+#modify ecx register and its 16 and 8 bit versions
+
+def modifyECX(firstWord, secondWord, thirdWord, fourthWord):
+    ECX[0:4] = [firstWord, secondWord, thirdWord, fourthWord]
+
+def modifyCX(thirdWord, fourthWord):
+    ECX[2:4] = [thirdWord, fourthWord]
+
+def modifyCH(thirdWord):
+    ECX[2:3] = [thirdWord]
+
+def modifyCL(fourthWord):
+    ECX[3:4] = [fourthWord]    
+
+#modify edx register and its 16 and 8 bit versions
+
+def modifyEDX(firstWord, secondWord, thirdWord, fourthWord):
+    EDX[0:4] = [firstWord, secondWord, thirdWord, fourthWord]
+
+def modifyDX(thirdWord, fourthWord):
+    EDX[2:4] = [thirdWord, fourthWord]
+
+def modifyDH(thirdWord):
+    EDX[2:3] = [thirdWord]
+
+def modifyDL(fourthWord):
+    EDX[3:4] = [fourthWord]
+
+#modify ebx register and its 16 and 8 bit versions
+def modifyEBX(firstWord, secondWord, thirdWord, fourthWord):
+    EBX[0:4] = [firstWord, secondWord, thirdWord, fourthWord]
+
+def modifyBX(thirdWord, fourthWord):
+    EBX[2:4] = [thirdWord, fourthWord]
+
+def modifyBH(thirdWord):
+    EBX[2:3] = [thirdWord]
+
+def modifyBL(fourthWord):
+    EBX[3:4] = [fourthWord]  
+
+#modify esp register and its 16bit versions
+def modifyESP(firstWord, secondWord, thirdWord, fourthWord):
+    ESP[0:4] = [firstWord, secondWord, thirdWord, fourthWord]
+
+def modifySP(thirdWord, fourthWord):
+    ESP[2:4] = [thirdWord, fourthWord]
+
+#modify ebp register and its 16bit versions
+def modifyEBP(firstWord, secondWord, thirdWord, fourthWord):
+    EBP[0:4] = [firstWord, secondWord, thirdWord, fourthWord]
+
+def modifyBP(thirdWord, fourthWord):
+    EBP[2:4] = [thirdWord, fourthWord]
+
+#modify esi register and its 16bit versions
+def modifyESI(firstWord, secondWord, thirdWord, fourthWord):
+    ESI[0:4] = [firstWord, secondWord, thirdWord, fourthWord]
+
+def modifySI(thirdWord, fourthWord):
+    ESI[2:4] = [thirdWord, fourthWord]
+
+
+
+#modify edi register and its 16bit versions
 def modifyEDI(firstWord, secondWord, thirdWord, fourthWord):
     EDI[0:4] = [firstWord, secondWord, thirdWord, fourthWord]
 
 def modifyDI(thirdWord, fourthWord):
-    EDI[0:2] = [thirdWord, fourthWord]
+    EDI[2:4] = [thirdWord, fourthWord]
 
 
-
+ax = EAX[2:4]
+print(EAX)
+print(ax)
+ax = ['changedax1', 'changedax2']
+print(EAX)
+print(ax)
 
 datG.node('R', 'Root')
 #datG.edge('R', '0-cmp', label='eax')
@@ -164,40 +252,257 @@ for idx, c in enumerate(instrEdges):
     for idz, b in enumerate(splitStr):
         tempNodeStr = instrNodes[(idx)]
 
-        if splitStr[idz] == "eax":
-            for ido, k in enumerate(EAX):
-                datG.edge(k, tempNodeStr, label=k)
-                #datG.edge(k, tempNodeStr, label='k')
-        if splitStr[idz] == "edi":
-            for ido, k in enumerate(EDI):
-                datG.edge(k, tempNodeStr, label=k) 
-                #datG.edge(k, tempNodeStr, label='k')
-        else:
-            datG.edge('R', tempNodeStr, label=b)
-            #datG.edge('R', tempNodeStr, label='b')
 
-        if "cmp" in tempNodeStr:
+        if idz == 0 and 'cmp' not in tempNodeStr:
+            # if dest reg is eax
+            if b == "eax":
+                modifyEAX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "ax":
+                modifyAX(nodes[idx],nodes[idx])
+            if b == "ah":
+                modifyAH(nodes[idx])
+            if b == "al":
+                modifyAL(nodes[idx])
+            #    
+            # if dest reg is ecx
+            if b == "ecx":
+                modifyECX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "cx":
+                modifyCX(nodes[idx],nodes[idx])
+            if b == "ch":
+                modifyCH(nodes[idx])
+            if b == "cl":
+                modifyCL(nodes[idx])
+            #    
+            # if dest reg is edx
+            if b == "edx":
+                modifyEDX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "dx":
+                modifyDX(nodes[idx],nodes[idx])
+            if b == "dh":
+                modifyDH(nodes[idx])
+            if b == "dl":
+                modifyDL(nodes[idx])
+            #    
+            # if dest reg is ebx
+            if b == "ebx":
+                modifyEBX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "bx":
+                modifyBX(nodes[idx],nodes[idx])
+            if b == "bh":
+                modifyBH(nodes[idx])
+            if b == "bl":
+                modifyBL(nodes[idx])
+            #
+            # if dest reg is esp
+            if b == "esp":
+                modifyESP(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "sp":
+                modifySP(nodes[idx],nodes[idx])
+            # if dest reg is ebp
+            if b == "ebp":
+                modifyEBP(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "ebp":
+                modifyBP(nodes[idx],nodes[idx])     
+            # if dest reg is esi
+            if b == "esi":
+                modifyESI(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "esi":
+                modifySI(nodes[idx],nodes[idx])      
+            # if dest reg is edi
+            if b == "edi":
+                modifyEDI(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "di":
+                modifyDI(nodes[idx],nodes[idx])  
+
+
+        if "mov" not in tempNodeStr:
+            #Eax edges 
+            if splitStr[idz] == "eax":
+                for ido, k in enumerate(EAX):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(eax)'+str(ido))
+            if splitStr[idz] == "ax":
+                for ido, k in enumerate(EAX[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ax)'+str(ido))
+            if splitStr[idz] == "ah":
+                for ido, k in enumerate(EAX[2:3]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ah)'+str(ido))
+            if splitStr[idz] == "al":
+                for ido, k in enumerate(EAX[3:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(al)'+str(ido))
+            #Ecx edges 
+            if splitStr[idz] == "ecx":
+                for ido, k in enumerate(ECX):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ecx)'+str(ido))
+            if splitStr[idz] == "cx":
+                for ido, k in enumerate(ECX[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(cx)'+str(ido))
+            if splitStr[idz] == "ch":
+                for ido, k in enumerate(ECX[2:3]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ch)'+str(ido))
+            if splitStr[idz] == "cl":
+                for ido, k in enumerate(ECX[3:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(cl)'+str(ido))
+            #
+            #Edx edges 
+            if splitStr[idz] == "edx":
+                for ido, k in enumerate(EDX):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(edx)'+str(ido))
+            if splitStr[idz] == "dx":
+                for ido, k in enumerate(EDX[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(dx)'+str(ido))
+            if splitStr[idz] == "dh":
+                for ido, k in enumerate(EDX[2:3]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(dh)'+str(ido))
+            if splitStr[idz] == "dl":
+                for ido, k in enumerate(EDX[3:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(dl)'+str(ido))
+            #
+            #Ebx edges 
+            if splitStr[idz] == "ebx":
+                for ido, k in enumerate(EBX):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ebx)'+str(ido))
+            if splitStr[idz] == "bx":
+                for ido, k in enumerate(EBX[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(bx)'+str(ido))
+            if splitStr[idz] == "bh":
+                for ido, k in enumerate(EBX[2:3]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(bh)'+str(ido))
+            if splitStr[idz] == "bl":
+                for ido, k in enumerate(EBX[3:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(bl)'+str(ido))
+            #esp edges
+            if splitStr[idz] == "esp":
+                for ido, k in enumerate(ESP):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(esp)'+str(ido))
+            if splitStr[idz] == "sp":
+                for ido, k in enumerate(ESP[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(sp)'+str(ido))
+            #
+            #ebp edges
+            if splitStr[idz] == "ebp":
+                for ido, k in enumerate(EBP):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ebp)'+str(ido))
+            if splitStr[idz] == "bp":
+                for ido, k in enumerate(EBP[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(bp)'+str(ido))
+            #
+            #esi edges
+            if splitStr[idz] == "esi":
+                for ido, k in enumerate(ESI):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(esi)'+str(ido))
+            if splitStr[idz] == "si":
+                for ido, k in enumerate(ESI[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(si)'+str(ido))
+            #
+            #
+            if splitStr[idz] == "edi":
+                for ido, k in enumerate(EDI):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(edi)'+str(ido))
+            if splitStr[idz] == "di":
+                for ido, k in enumerate(EDI[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(di)'+str(ido))
+            #
+            else:
+                datG.edge('R', tempNodeStr, label=str(k)+'(misc)'+str(ido))
+             
+
+        if "cmp" in tempNodeStr and idz == 0:
             statusFlags = ['OF', 'SF', 'ZF', 'AF', 'CF', 'PF']
             #if b == "edi":
                 # if src reg is eax
-                      
+
                     
-        if "mov" in tempNodeStr:
-            print('mov detected.' + str(idz))
-            if idz == 0:
-                # if dest reg is edi
-                if b == "edi":
-                    # if src reg is eax
-                    if splitStr[1] == "eax":
-                        modifyEDI(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
-                # if dest reg is eax
-                if b == "eax":
-                    # if src reg is edi
-                    if splitStr[1] == "edi":
-                        modifyEAX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
-
-
-
+        if "mov" in tempNodeStr and idz == 1:
+             #Eax edges 
+            if splitStr[idz] == "eax":
+                for ido, k in enumerate(EAX):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(eax)'+str(ido))
+            if splitStr[idz] == "ax":
+                for ido, k in enumerate(EAX[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ax)'+str(ido))
+            if splitStr[idz] == "ah":
+                for ido, k in enumerate(EAX[2:3]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ah)'+str(ido))
+            if splitStr[idz] == "al":
+                for ido, k in enumerate(EAX[3:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(al)'+str(ido))
+            #Ecx edges 
+            if splitStr[idz] == "ecx":
+                for ido, k in enumerate(ECX):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ecx)'+str(ido))
+            if splitStr[idz] == "cx":
+                for ido, k in enumerate(ECX[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(cx)'+str(ido))
+            if splitStr[idz] == "ch":
+                for ido, k in enumerate(ECX[2:3]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ch)'+str(ido))
+            if splitStr[idz] == "cl":
+                for ido, k in enumerate(ECX[3:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(cl)'+str(ido))
+            #
+            #Edx edges 
+            if splitStr[idz] == "edx":
+                for ido, k in enumerate(EDX):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(edx)'+str(ido))
+            if splitStr[idz] == "dx":
+                for ido, k in enumerate(EDX[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(dx)'+str(ido))
+            if splitStr[idz] == "dh":
+                for ido, k in enumerate(EDX[2:3]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(dh)'+str(ido))
+            if splitStr[idz] == "dl":
+                for ido, k in enumerate(EDX[3:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(dl)'+str(ido))
+            #
+            #Ebx edges 
+            if splitStr[idz] == "ebx":
+                for ido, k in enumerate(EBX):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ebx)'+str(ido))
+            if splitStr[idz] == "bx":
+                for ido, k in enumerate(EBX[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(bx)'+str(ido))
+            if splitStr[idz] == "bh":
+                for ido, k in enumerate(EBX[2:3]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(bh)'+str(ido))
+            if splitStr[idz] == "bl":
+                for ido, k in enumerate(EBX[3:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(bl)'+str(ido))
+            #esp edges
+            if splitStr[idz] == "esp":
+                for ido, k in enumerate(ESP):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(esp)'+str(ido))
+            if splitStr[idz] == "sp":
+                for ido, k in enumerate(ESP[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(sp)'+str(ido))
+            #
+            #ebp edges
+            if splitStr[idz] == "ebp":
+                for ido, k in enumerate(EBP):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(ebp)'+str(ido))
+            if splitStr[idz] == "bp":
+                for ido, k in enumerate(EBP[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(bp)'+str(ido))
+            #
+            #esi edges
+            if splitStr[idz] == "esi":
+                for ido, k in enumerate(ESI):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(esi)'+str(ido))
+            if splitStr[idz] == "si":
+                for ido, k in enumerate(ESI[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(si)'+str(ido))
+            #
+            #
+            if splitStr[idz] == "edi":
+                for ido, k in enumerate(EDI):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(edi)'+str(ido))
+            if splitStr[idz] == "di":
+                for ido, k in enumerate(EDI[2:4]):
+                    datG.edge(k, tempNodeStr, label=str(k)+'(di)'+str(ido))
+            #
+            else:
+                datG.edge('R', tempNodeStr, label=str(k)+'(misc)'+str(ido))                
+                      
 
 
     #iterate through the flags outputted (affected) by the instruction and do both:
