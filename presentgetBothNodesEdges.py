@@ -233,33 +233,18 @@ def modifyEDI(firstWord, secondWord, thirdWord, fourthWord):
 def modifyDI(thirdWord, fourthWord):
     EDI[2:4] = [thirdWord, fourthWord]
 
-orangeInst = [
-'and',
-'cmovz',
-'imul',
-'pop',
-'sar',
-'inc',
-'xor',
-'sub',
-'neg',
-'rep',
-'add',
-'adc',
-'setbe',
-'mov',
-'cmpxchg',
- 'sbb',
-'shr',
-'shl',
-'or',
-'setz',
-]
 
+ax = EAX[2:4]
+print(EAX)
+print(ax)
+ax = ['changedax1', 'changedax2']
+print(EAX)
+print(ax)
 
 datG.node('R', 'Root')
+#datG.edge('R', '0-cmp', label='eax')
+#datG.edge('R', '0-cmp', label='0xfffff001' )
 datG.node('Out', 'Output')
-
 pattern = re.compile("^\s+|\s*,\s*|\s+$")
 for idx, c in enumerate(instrEdges):
     splitStr = [a for a in pattern.split(c) if a]
@@ -267,76 +252,71 @@ for idx, c in enumerate(instrEdges):
     for idz, b in enumerate(splitStr):
         tempNodeStr = instrNodes[(idx)]
 
-        #light orange in regModifyRules spreadsheet
 
-        if ('shr' in tempNodeStr):
-            print('shrDetected!')
-
-        if idz == 0:
-                if any(x in str(tempNodeStr) for x in orangeInst):
-                    # if dest reg is eax
-                    if b == "eax":
-                        modifyEAX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
-                    if b == "ax":
-                        modifyAX(nodes[idx],nodes[idx])
-                    if b == "ah":
-                        modifyAH(nodes[idx])
-                    if b == "al":
-                        modifyAL(nodes[idx])
-                    #    
-                    # if dest reg is ecx
-                    if b == "ecx":
-                        modifyECX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
-                    if b == "cx":
-                        modifyCX(nodes[idx],nodes[idx])
-                    if b == "ch":
-                        modifyCH(nodes[idx])
-                    if b == "cl":
-                        modifyCL(nodes[idx])
-                    #    
-                    # if dest reg is edx
-                    if b == "edx":
-                        modifyEDX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
-                    if b == "dx":
-                        modifyDX(nodes[idx],nodes[idx])
-                    if b == "dh":
-                        modifyDH(nodes[idx])
-                    if b == "dl":
-                        modifyDL(nodes[idx])
-                    #    
-                    # if dest reg is ebx
-                    if b == "ebx":
-                        modifyEBX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
-                    if b == "bx":
-                        modifyBX(nodes[idx],nodes[idx])
-                    if b == "bh":
-                        modifyBH(nodes[idx])
-                    if b == "bl":
-                        modifyBL(nodes[idx])
-                    #
-                    # if dest reg is esp
-                    if b == "esp":
-                        modifyESP(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
-                    if b == "sp":
-                        modifySP(nodes[idx],nodes[idx])
-                    # if dest reg is ebp
-                    if b == "ebp":
-                        modifyEBP(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
-                    if b == "ebp":
-                        modifyBP(nodes[idx],nodes[idx])     
-                    # if dest reg is esi
-                    if b == "esi":
-                        modifyESI(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
-                    if b == "esi":
-                        modifySI(nodes[idx],nodes[idx])      
-                    # if dest reg is edi
-                    if b == "edi":
-                        modifyEDI(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
-                    if b == "di":
-                        modifyDI(nodes[idx],nodes[idx])  
+        if (idz == 0 and 'mov' not in tempNodeStr):
+            # if dest reg is eax
+            if b == "eax":
+                modifyEAX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "ax":
+                modifyAX(nodes[idx],nodes[idx])
+            if b == "ah":
+                modifyAH(nodes[idx])
+            if b == "al":
+                modifyAL(nodes[idx])
+            #    
+            # if dest reg is ecx
+            if b == "ecx":
+                modifyECX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "cx":
+                modifyCX(nodes[idx],nodes[idx])
+            if b == "ch":
+                modifyCH(nodes[idx])
+            if b == "cl":
+                modifyCL(nodes[idx])
+            #    
+            # if dest reg is edx
+            if b == "edx":
+                modifyEDX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "dx":
+                modifyDX(nodes[idx],nodes[idx])
+            if b == "dh":
+                modifyDH(nodes[idx])
+            if b == "dl":
+                modifyDL(nodes[idx])
+            #    
+            # if dest reg is ebx
+            if b == "ebx":
+                modifyEBX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "bx":
+                modifyBX(nodes[idx],nodes[idx])
+            if b == "bh":
+                modifyBH(nodes[idx])
+            if b == "bl":
+                modifyBL(nodes[idx])
+            #
+            # if dest reg is esp
+            if b == "esp":
+                modifyESP(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "sp":
+                modifySP(nodes[idx],nodes[idx])
+            # if dest reg is ebp
+            if b == "ebp":
+                modifyEBP(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "ebp":
+                modifyBP(nodes[idx],nodes[idx])     
+            # if dest reg is esi
+            if b == "esi":
+                modifyESI(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "esi":
+                modifySI(nodes[idx],nodes[idx])      
+            # if dest reg is edi
+            if b == "edi":
+                modifyEDI(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+            if b == "di":
+                modifyDI(nodes[idx],nodes[idx])  
 
 
-        if "cmp" in tempNodeStr and idz==0:
+        if "cmp" in tempNodeStr and idz == 0:
             #Eax edges 
             if splitStr[idz] == "eax":
                 for ido, k in enumerate(EAX):
@@ -424,7 +404,7 @@ for idx, c in enumerate(instrEdges):
                     datG.edge(k, tempNodeStr, label=str(k)+'(di)'+str(ido))
             #
             else:
-                datG.edge('R', tempNodeStr, label=str(k)+'(misc)'+str(ido))
+                datG.edge('R', tempNodeStr, label=str(k)+'(misc cmp)'+str(ido))
              
 
         if "cmp" in tempNodeStr and idz == 0:
@@ -432,7 +412,7 @@ for idx, c in enumerate(instrEdges):
             #if b == "edi":
                 # if src reg is eax
 
-                    
+                 
         if "mov" in tempNodeStr and idz == 1:
              #Eax edges 
             if splitStr[idz] == "eax":
@@ -521,9 +501,8 @@ for idx, c in enumerate(instrEdges):
                     datG.edge(k, tempNodeStr, label=str(k)+'(di)'+str(ido))
             #
             else:
-                k = "unhandledParam"
-                datG.edge('R', tempNodeStr, label=str(k)+'(misc)'+str(-1))                
-                      
+                datG.edge('R', tempNodeStr, label=str('unhandledParam')+'(misc mov)'+str(-1))                
+                
 
 
     #iterate through the flags outputted (affected) by the instruction and do both:
