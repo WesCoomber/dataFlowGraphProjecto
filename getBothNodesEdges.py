@@ -8,23 +8,27 @@ bad_words = [ 'jns', 'js', 'jnz', 'jz', 'jno', 'jo', 'jbe', 'jb', 'jle', 'jl', '
 instrEdges = []
 instrNodes = []
 
-with open('smallCleanedSlice.txt') as oldfile:
+fileName = 'cleanedSlice5-24fixed.txt'
+outFileName = 'output5.txt'
+
+with open(fileName) as oldfile:
     for line in oldfile:
         tempLine = line.split()
-        instrNodes.append(tempLine[1] + '-' + tempLine[2])
+        if (len(tempLine)) >= 2:
+            instrNodes.append(tempLine[1] + '-' + tempLine[2])
 
 i=0
 for x in instrNodes:
     instrNodes[i] = x.replace("#", "")
     i += 1
 instrNodesString = ''.join(instrNodes)
-print('Done! Instruction Nodes List Size is : ') #+ instrNodesString
-#print(instrNodes)
+
+print('Done! Instruction Nodes List Size is : ') 
 print(len(instrNodes))
-#print(instrNodes[len(instrNodes)-1])
+
 
 pattern = '\s+(\S+)\s'
-with open('smallCleanedSlice.txt') as oldfile:
+with open(fileName) as oldfile:
     for line in oldfile:
         prepline = line.replace("#\S*", " r1 ")
         prepline = prepline.replace("[SLICE_INFO]", " r2 ")
@@ -48,28 +52,13 @@ with open('smallCleanedSlice.txt') as oldfile:
             
         instrEdges.append(tempEdge)
 
-#str1 = ''.join(tempLine)
-
-#for line in str1:
-
-dict1 ={}
-j = 0
-
-#give unique id number for each instruction based on its line number (starting at 0)
-'''for x in instrNodes:
-    instrNodes[j] = str(j)+ '-' +instrNodes[j]
-    j+=1
-'''
-
 instrNodesString = ''.join(instrEdges)
+
 print('Done! Instruction Edges List size is : ') #+ instrNodesString
-#print(instrEdges)
-#print(instrNodes)
 print(len(instrEdges))
 
 
 new_dict = {k: v for k, v in zip(instrNodes, instrEdges)}
-#print(dict1)
 #example dictionary entry is dict1['0-cmp': 'eax, 0xfffff001']
 print('Done! Dict (LineNumber-Instruction: Edges) is : ')
 #print((new_dict).keys())
@@ -233,32 +222,56 @@ def modifyEDI(firstWord, secondWord, thirdWord, fourthWord):
 def modifyDI(thirdWord, fourthWord):
     EDI[2:4] = [thirdWord, fourthWord]
 
+#orange instructions "dest reg or mem location modified as output edge" and one 1 source
+
 orangeInst = [
-'and',
 'cmovz',
-'imul',
 'pop',
-'sar',
 'inc',
-'xor',
-'sub',
 'neg',
 'rep',
-'add',
-'adc',
 'setbe',
 'mov',
 'cmpxchg',
- 'sbb',
-'shr',
-'shl',
-'or',
-'setz',
+'setz'
 ]
 
 
+
+
+#gold instructions "dest reg or mem location modified as output edge" and two 2 sources
+
+goldInst = [
+'and',
+'imul',
+'sar',
+'xor',
+'sub',
+'add',
+'adc',
+'shr',
+'shl',
+'or',
+]
+
+#green instructions "dest reg or mem location modified as output edge" and three 3 sources
+
+greenInst = [
+'sbb',
+]
+
+
+#pink instructions "NO dest reg or mem location modified as output edge" and two 2 source
+
+pinkInst = [
+'test',
+'bt',
+'cmp'
+]
+
+statusFlags = [] 
 datG.node('R', 'Root')
-datG.node('Out', 'Output')
+#datG.node('Out', 'Output')
 
 pattern = re.compile("^\s+|\s*,\s*|\s+$")
 for idx, c in enumerate(instrEdges):
@@ -267,11 +280,9 @@ for idx, c in enumerate(instrEdges):
     for idz, b in enumerate(splitStr):
         tempNodeStr = instrNodes[(idx)]
 
-        #light orange in regModifyRules spreadsheet
+        #light orange in regModifyRules spreadsheet 1 one source
         if idz == 0:
-                if any(x in tempNodeStr for x in orangeInst):
-                    if x == 'shr':
-                       print('shrDetected!') 
+                if ((any(x in tempNodeStr for x in orangeInst)) or (any(x in tempNodeStr for x in goldInst)) or (any(x in tempNodeStr for x in greenInst))):
                     # if dest reg is eax
                     if b == "eax":
                         modifyEAX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
@@ -333,104 +344,176 @@ for idx, c in enumerate(instrEdges):
                     if b == "di":
                         modifyDI(nodes[idx],nodes[idx])  
 
-        #input edges , cmp has for each argument passed in (a AND b)
-        if "cmp" in tempNodeStr:
+        #input edges , cmp has for each argument passed in (a AND b) as 2 sources
+        if ((any(x in tempNodeStr for x in pinkInst)) or (any(x in tempNodeStr for x in goldInst))):
             #Eax edges 
             if splitStr[idz] == "eax":
                 for ido, k in enumerate(EAX):
                     datG.edge(k, tempNodeStr, label=str(k)+'(eax)'+str(ido))
-            if splitStr[idz] == "ax":
+            elif splitStr[idz] == "ax":
                 for ido, k in enumerate(EAX[2:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(ax)'+str(ido))
-            if splitStr[idz] == "ah":
+            elif splitStr[idz] == "ah":
                 for ido, k in enumerate(EAX[2:3]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(ah)'+str(ido))
-            if splitStr[idz] == "al":
+            elif splitStr[idz] == "al":
                 for ido, k in enumerate(EAX[3:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(al)'+str(ido))
             #Ecx edges 
-            if splitStr[idz] == "ecx":
+            elif splitStr[idz] == "ecx":
                 for ido, k in enumerate(ECX):
                     datG.edge(k, tempNodeStr, label=str(k)+'(ecx)'+str(ido))
-            if splitStr[idz] == "cx":
+            elif splitStr[idz] == "cx":
                 for ido, k in enumerate(ECX[2:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(cx)'+str(ido))
-            if splitStr[idz] == "ch":
+            elif splitStr[idz] == "ch":
                 for ido, k in enumerate(ECX[2:3]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(ch)'+str(ido))
-            if splitStr[idz] == "cl":
+            elif splitStr[idz] == "cl":
                 for ido, k in enumerate(ECX[3:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(cl)'+str(ido))
             #
             #Edx edges 
-            if splitStr[idz] == "edx":
+            elif splitStr[idz] == "edx":
                 for ido, k in enumerate(EDX):
                     datG.edge(k, tempNodeStr, label=str(k)+'(edx)'+str(ido))
-            if splitStr[idz] == "dx":
+            elif splitStr[idz] == "dx":
                 for ido, k in enumerate(EDX[2:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(dx)'+str(ido))
-            if splitStr[idz] == "dh":
+            elif splitStr[idz] == "dh":
                 for ido, k in enumerate(EDX[2:3]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(dh)'+str(ido))
-            if splitStr[idz] == "dl":
+            elif splitStr[idz] == "dl":
                 for ido, k in enumerate(EDX[3:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(dl)'+str(ido))
             #
             #Ebx edges 
-            if splitStr[idz] == "ebx":
+            elif splitStr[idz] == "ebx":
                 for ido, k in enumerate(EBX):
                     datG.edge(k, tempNodeStr, label=str(k)+'(ebx)'+str(ido))
-            if splitStr[idz] == "bx":
+            elif splitStr[idz] == "bx":
                 for ido, k in enumerate(EBX[2:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(bx)'+str(ido))
-            if splitStr[idz] == "bh":
+            elif splitStr[idz] == "bh":
                 for ido, k in enumerate(EBX[2:3]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(bh)'+str(ido))
-            if splitStr[idz] == "bl":
+            elif splitStr[idz] == "bl":
                 for ido, k in enumerate(EBX[3:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(bl)'+str(ido))
             #esp edges
-            if splitStr[idz] == "esp":
+            elif splitStr[idz] == "esp":
                 for ido, k in enumerate(ESP):
                     datG.edge(k, tempNodeStr, label=str(k)+'(esp)'+str(ido))
-            if splitStr[idz] == "sp":
+            elif splitStr[idz] == "sp":
                 for ido, k in enumerate(ESP[2:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(sp)'+str(ido))
             #
             #ebp edges
-            if splitStr[idz] == "ebp":
+            elif splitStr[idz] == "ebp":
                 for ido, k in enumerate(EBP):
                     datG.edge(k, tempNodeStr, label=str(k)+'(ebp)'+str(ido))
-            if splitStr[idz] == "bp":
+            elif splitStr[idz] == "bp":
                 for ido, k in enumerate(EBP[2:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(bp)'+str(ido))
             #
             #esi edges
-            if splitStr[idz] == "esi":
+            elif splitStr[idz] == "esi":
                 for ido, k in enumerate(ESI):
                     datG.edge(k, tempNodeStr, label=str(k)+'(esi)'+str(ido))
-            if splitStr[idz] == "si":
+            elif splitStr[idz] == "si":
                 for ido, k in enumerate(ESI[2:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(si)'+str(ido))
             #
             #
-            if splitStr[idz] == "edi":
+            elif splitStr[idz] == "edi":
                 for ido, k in enumerate(EDI):
                     datG.edge(k, tempNodeStr, label=str(k)+'(edi)'+str(ido))
-            if splitStr[idz] == "di":
+            elif splitStr[idz] == "di":
                 for ido, k in enumerate(EDI[2:4]):
                     datG.edge(k, tempNodeStr, label=str(k)+'(di)'+str(ido))
             #
             else:
                 datG.edge('R', tempNodeStr, label=str(k)+'(misc)'+str(ido))
              
+        #iterate through the flags outputted (affected) by the instruction and do both:
+        #add an edge from the instruction to generic 'OutputNode'
+        #update the flags with newest most recent values
+        for idy, c in enumerate(statusFlags):
+            #this was the output edge place holder
+            #datG.edge(tempNodeStr, 'Out', label=tempNodeStr + ',' + str(c))
 
-        if "cmp" in tempNodeStr and idz == 0:
-            statusFlags = ['OF', 'SF', 'ZF', 'AF', 'CF', 'PF']
-            #if b == "edi":
-                # if src reg is eax
+            if c == "OF":
+                newestOF = tempNodeStr
+            if c == "SF":
+                newestSF = tempNodeStr
+            if c == "ZF":
+                newestZF = tempNodeStr
+            if c == "AF":
+                newestAF = tempNodeStr
+            if c == "CF":
+                newestCF = tempNodeStr
+            if c == "PF":
+                newestPF = tempNodeStr
+            
+        statusFlags = [] 
+        FlagRegList = [newestOF, newestSF, newestZF, newestAF, newestCF, newestPF]
 
-        #input edges , mov only has one (the second argument b)           
+        #if affects flags register then if [instr] and set status flags to a list of affected flags
+        if idz == 0:
+            #if instruction affects flags then put if statement for it under here
+            if "and" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'PF']
+            if "imul" in tempNodeStr:
+                statusFlags = ['CF', 'OF']
+            if "neg" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'AF', 'PF']
+            #bug shifts should set the OF flag too if it is specifically a 1 bit shift
+            if "sar" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'PF']
+            if "shr" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'PF']
+            if "shl" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'PF']
+            if "mul" in tempNodeStr:
+                statusFlags = ['CF', 'OF']
+            if "and" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'PF']
+            if "xor" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'PF']
+            if "add" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'AF', 'PF']
+            if "adc" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'AF', 'PF']
+            if "cmpxchg" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'AF', 'PF']
+            if "sbb" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'AF', 'PF']
+            if "cmp" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'AF', 'PF']
+            if "inc" in tempNodeStr:
+                statusFlags = ['OF', 'SF', 'ZF', 'AF', 'PF']
+            if "dec" in tempNodeStr:
+                statusFlags = ['OF', 'SF', 'ZF', 'AF', 'PF']
+            if "sub" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'AF', 'PF']
+            if "or" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'PF']
+            # if instr takes flag as input then put if statement for it under here
+            #FlagRegList = [0newestOF, 1newestSF, 2newestZF, 3newestAF, 4newestCF, 5newestPF]
+            if "sbb" in tempNodeStr:
+                datG.edge(FlagRegList[4], tempNodeStr, label=FlagRegList[4] + '(' + str(new_dict[FlagRegList[4]])+ ', CF' +')')
+            if "setz" in tempNodeStr:
+                datG.edge(FlagRegList[2], tempNodeStr, label=FlagRegList[2] + '(' + str(new_dict[FlagRegList[2]])+ ', ZF' +')')
+            if "setbe" in tempNodeStr:
+                datG.edge(FlagRegList[2], tempNodeStr, label=FlagRegList[2] + '(' + str(new_dict[FlagRegList[2]])+ ', ZF' +')')
+                datG.edge(FlagRegList[4], tempNodeStr, label=FlagRegList[4] + '(' + str(new_dict[FlagRegList[4]])+ ', CF' +')')
+            if "cmovz" in tempNodeStr:
+                datG.edge(FlagRegList[2], tempNodeStr, label=FlagRegList[2] + '(' + str(new_dict[FlagRegList[2]])+ ', ZF' +')')
+
+
+
+
+        #input edges for orangeInstructions, such as 'mov' they only have one 1 source          
         if idz == 1:
                 if any(x in str(tempNodeStr) for x in orangeInst):
                      #Eax edges 
@@ -525,28 +608,6 @@ for idx, c in enumerate(instrEdges):
                       
 
 
-    #iterate through the flags outputted (affected) by the instruction and do both:
-    #add an edge from the instruction to generic 'OutputNode'
-    #update the flags with newest most recent values
-    for idy, c in enumerate(statusFlags):
-        datG.edge(tempNodeStr, 'Out', label=tempNodeStr + ',' + str(c))
-
-        if c == "OF":
-            newestOF = tempNodeStr + '-' + str(c)
-        if c == "SF":
-            newestSF = tempNodeStr + '-' + str(c)
-        if c == "ZF":
-            newestZF = tempNodeStr + '-' + str(c)
-        if c == "AF":
-            newestAF = tempNodeStr + '-' + str(c)
-        if c == "CF":
-            newestCF = tempNodeStr + '-' + str(c)
-        if c == "PF":
-            newestPF = tempNodeStr + '-' + str(c)
-            
-    statusFlags = [] 
-
-newFlagRegList = [newestOF, newestSF, newestZF, newestAF, newestCF, newestPF]
 
 '''
 for idx, c in enumerate(statusFlags):
@@ -560,113 +621,11 @@ add_nodes(datG)
 
 print(datG.source)
 
+with open(outFileName, 'w') as outFile:
+    for line in datG.source:
+        outFile.write(line)
+
 src = Source(datG)
-src.render('test-output/dataFlowSliceWes1.gv', view=True)
+src.render('test-output/smalldataFlowSliceWes5.gv', view=True)
 
-#some example graph code 
-'''
-class Graph(object):
-
-    def __init__(self, graph_dict=None):
-        """ initializes a graph object 
-            If no dictionary or None is given, 
-            an empty dictionary will be used
-        """
-        if graph_dict == None:
-            graph_dict = {}
-        self.__graph_dict = graph_dict
-
-    def vertices(self):
-        """ returns the vertices of a graph """
-        return list(self.__graph_dict.keys())
-
-    def edges(self):
-        """ returns the edges of a graph """
-        return self.__generate_edges()
-
-    def add_vertex(self, vertex):
-        """ If the vertex "vertex" is not in 
-            self.__graph_dict, a key "vertex" with an empty
-            list as a value is added to the dictionary. 
-            Otherwise nothing has to be done. 
-        """
-        if vertex not in self.__graph_dict:
-            self.__graph_dict[vertex] = []
-
-    def add_edge(self, edge):
-        """ assumes that edge is of type set, tuple or list; 
-            between two vertices can be multiple edges! 
-        """
-        edge = set(edge)
-        (vertex1, vertex2) = tuple(edge)
-        if vertex1 in self.__graph_dict:
-            self.__graph_dict[vertex1].append(vertex2)
-        else:
-            self.__graph_dict[vertex1] = [vertex2]
-
-    def __generate_edges(self):
-        """ A static method generating the edges of the 
-            graph "graph". Edges are represented as sets 
-            with one (a loop back to the vertex) or two 
-            vertices 
-        """
-        edges = []
-        for vertex in self.__graph_dict:
-            for neighbour in self.__graph_dict[vertex]:
-                if {neighbour, vertex} not in edges:
-                    edges.append({vertex, neighbour})
-        return edges
-
-    def __str__(self):
-        res = "vertices: "
-        for k in self.__graph_dict:
-            res += str(k) + " "
-        res += "\nedges: "
-        for edge in self.__generate_edges():
-            res += str(edge) + " "
-        return res
-
-
-if __name__ == "__main__":
-
-    f = { "a" : ["d"],
-          "b" : ["c"],
-          "c" : ["b", "c", "d", "e"],
-          "d" : ["a", "c"],
-          "e" : ["c"],
-          "f" : []
-        }
-
-
-    print(new_dict)
-    print(new_dict['0-cmp'])
-    graph = Graph(new_dict)
-
-    print("Vertices of graph:")
-    print(graph.vertices())
-
-    print("Edges of graph:")
-    print(graph.edges())
-
-    print("Add vertex:")
-    graph.add_vertex("z")
-
-    print("Vertices of graph:")
-    print(graph.vertices())
- 
-    print("Add an edge:")
-    graph.add_edge({"a","z"})
-    
-    print("Vertices of graph:")
-    print(graph.vertices())
-
-    print("Edges of graph:")
-    print(graph.edges())
-
-    print('Adding an edge {"x","y"} with new vertices:')
-    graph.add_edge({"x","y"})
-    print("Vertices of graph:")
-    print(graph.vertices())
-    print("Edges of graph:")
-    print(graph.edges())    
-'''
+print('done! check '+ outFileName + '.txt')
