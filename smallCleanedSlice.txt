@@ -3,9 +3,12 @@
 [SLICE] #b7fe3d17 #mov edi, eax	    [SLICE_INFO] #src_reg[10:1:4] #src_reg_value 512
 [SLICE] #b7fe3d18 #mov al, dh	    [SLICE_INFO] #src_reg[10:1:4] #src_reg_value 512
 [SLICE] #b7fe3d19 #mov dword ptr [edx], eax	    [SLICE_INFO] #src_regreg[10:1:4,8:0:4] #dst_reg_value 512, src_reg_value 3221221340
+[SLICE_ADDRESSING] immediate_address $addr(0xbfffefdc)  //come with b7fe3d19 (move upwards)
 [SLICE] #b7ff6646 #mov eax, dword ptr [esi-0x8]	    [SLICE_INFO] #src_memreg[bfffefe0:1:4,4:0:4] #mem_value 1179403647, reg_value 3221221352
+[SLICE_ADDRESSING] immediate_address $addr(0xbfffefe0)  //come with b7ff6646 (move upwards)
 [SLICE] #b7ff664c #cmp eax, ecx	    [SLICE_INFO] #src_regreg[10:1:4,9:0:4] #dst_reg_value 1179403647, src_reg_value 1179403647
 [SLICE] #b7ff6654 #mov eax, dword ptr [esi-0x4]	    [SLICE_INFO] #src_memreg[bfffefe4:1:4,4:0:4] #mem_value 50397441, reg_value 3221221352
+[SLICE_ADDRESSING] immediate_address $addr(0xbfffefe4)  //come with b7ff6654 (move upwards)
 [SLICE] #b7ff665a #cmp edi, ecx	    [SLICE_INFO] #src_regreg[10:1:4,9:0:4] #dst_reg_value 50397441, src_reg_value 65793
 [SLICE] #b7ff6867 #cmp al, cl	    [SLICE_INFO] #src_regreg[10:1:1,9:0:1] #dst_reg_value 1, src_reg_value 1
 [SLICE] #b7ff686b #cmp ah, ch	    [SLICE_INFO] #src_regreg[10:1:1,9:0:1] #dst_reg_value 1, src_reg_value 1
@@ -15,3 +18,5 @@
 [SLICE] #b7ff3a13 #cmp ah, dl	    [SLICE_INFO] #src_regreg[10:1:1,9:0:1] #dst_reg_value 1, src_reg_value 1
 [SLICE] #b7ff3a14 #cmp ecx, eax	    [SLICE_INFO] #src_regreg[10:1:1,9:0:1] #dst_reg_value 1, src_reg_value 1
 [SLICE] #b7fe1eda #sbb edx, ebx
+[SLICE] #b7fe1edb #cmp eax, dword ptr [edx]	    [SLICE_INFO] #src_regreg[10:1:4,9:0:4] #dst_reg_value 1179403647, src_reg_value 1179403647
+[SLICE_ADDRESSING] immediate_address $addr(0xbfffefdc)  //come with b7fe3d19 (move upwards)
