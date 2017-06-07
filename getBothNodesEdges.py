@@ -283,7 +283,7 @@ for idx, c in enumerate(instrEdges):
 
         #input edges for orangeInstructions, such as 'mov' they only have one 1 source(second arg)         
         if idz == 1:
-                if any(x in str(tempNodeStr) for x in orangeInst):
+                if any(x in tempNodeStr for x in orangeInst):
                      #Eax edges 
                     if splitStr[idz] == "eax":
                         for ido, k in enumerate(EAX):
@@ -465,7 +465,7 @@ for idx, c in enumerate(instrEdges):
                     datG.edge(k, tempNodeStr, label=str(k)+'(di)'+str(ido))
             #
             else:
-                datG.edge(k, tempNodeStr, label=str(k)+'(misc)'+str(ido))
+                datG.edge(k, tempNodeStr, label=str(k)+'(misc)'+str(-2))
 
         # orange/gold/green Modify 1 one source
         if idz == 0:
@@ -609,18 +609,6 @@ for idx, c in enumerate(instrEdges):
                 datG.edge(FlagRegList[2], tempNodeStr, label=FlagRegList[2] + '(' + str(new_dict[FlagRegList[2]])+ ', ZF' +')')
 
 
-
-
-
-
-
-'''
-for idx, c in enumerate(statusFlags):
-    tempNodeStr = instrNodes[(idx)]
-    datG.edge('b7ff5c05-cmp', 'Out', label=tempNodeStr + '-' + c)
-'''
-
-
 add_nodes(datG)
 #add_edges(datG)
 
@@ -633,4 +621,4 @@ with open(outFileName, 'w') as outFile:
 src = Source(datG)
 src.render(renderFileName, view=True)
 
-print('done! check '+ outFileName + '.txt')
+print('done! check '+ outFileName)
