@@ -8,8 +8,8 @@ bad_words = [ 'jns', 'js', 'jnz', 'jz', 'jno', 'jo', 'jbe', 'jb', 'jle', 'jl', '
 instrEdges = []
 instrNodes = []
 
-fileName = 'smallCleanedSlice.txt'
-outFileName = 'b200undiroutputGraph.txt'
+fileName = '200CleanedSlice.txt'
+outFileName = 'c200undiroutputGraph.txt'
 renderFileName = 'test-output/b200undirULsmalldataFlowSliceWes.gv'
 
 with open(fileName) as oldfile:
@@ -134,12 +134,12 @@ def add_edges(graph):
 
 
 cmpFlags = []
-newestOF = ''
-newestSF = ''
-newestZF = ''
-newestAF = ''
-newestCF = ''
-newestPF = ''
+newestOF = 'R'
+newestSF = 'R'
+newestZF = 'R'
+newestAF = 'R'
+newestCF = 'R'
+newestPF = 'R'
 
 # default values 'R' means edge from root node in the 32-bit 4word registers
 #Accumulator    Counter     Data    Base    Stack Pointer   Stack Base Pointer  Source  Destination
@@ -246,14 +246,22 @@ def modifyDI(thirdWord, fourthWord):
 
 orangeInst = [
 'cmovz',
-'pop',
 'inc',
 'neg',
 'rep',
 'setbe',
 'mov',
 'cmpxchg',
-'setz'
+'setz',
+'cmovb',
+'cmovbe',
+'cmovnbe',
+'cmovnz',
+'cmovs',
+'dec',
+'lea',
+'movsx',
+'movzx',
 ]
 
 
@@ -280,6 +288,34 @@ greenInst = [
 'sbb',
 ]
 
+# one source specified in slice AND one implicit source and no destination output
+blueInst = [
+#POP = and StackPOINTER is implicitly a source and STACKPOINTER regESP IS MODIFIED
+'pop',
+#'push',
+]
+
+# no source specified in slice AND one implicit source and one destination output
+tealInst = [
+#PUSH = and StackPOINTER is implicitly a source and STACKPOINTER regESP IS MODIFIED
+'push',
+]
+
+# one source specified in slice AND one implicit source and one implicit destination output 
+redInst = [
+#MUL the explicit soure is specified in slice AX or DX:AX or EDX:EAX is the implicit source
+'mul',
+]
+
+# one source specified in slice AND one implicit source and two implicit destination outputs 
+greyInst = [
+'div',
+]
+
+#no explicit sources/one destination output, and consumes flags to set the destination (which is the single explicit arg in slice)
+purpInst = [
+ 'setnz',
+]
 
 #pink instructions "NO dest reg or mem location modified as output edge" and two 2 source
 
@@ -299,12 +335,12 @@ pattern = re.compile("^\s+|\s*,\s*|\s+$")
 for idx, c in enumerate(instrEdges):
     splitStr = [a for a in pattern.split(c) if a]
 
-    print('splitStr ' + str(idx) + ' ' + str(splitStr))
+    #print('splitStr ' + str(idx) + ' ' + str(splitStr))
 
     for idz, b in enumerate(splitStr):
         tempNodeStr = instrNodes[(idx)]
 
-        #print('splitStrZ ' + str(idz) + ' ' + str(splitStr))
+        print('splitStrZ ' + str(idz) + ' ' + str(b))
         #input edges for orangeInstructions, such as 'mov' they only have one 1 source(second arg)         
         if idz == 1:
                 if any(x in tempNodeStr for x in orangeInst):
@@ -400,8 +436,100 @@ for idx, c in enumerate(instrEdges):
                             datG.edge(memAddressDict[splitStr[idz]], tempNodeStr, label=memAddressDict[splitStr[idz]]+'(mem)'+str(1))
                         else:
                             datG.edge('R', tempNodeStr, label=''+'(imm)'+str(1))   
-             
-                      
+        #THIS IS FOR BLUE INSTRUCTIONS, WHICH ARE INSTRUCTIONS THAT HAVE ONLY ONE EXPLICIT ARGUMENT IN THE SLICE
+        #PUSH IS NOT RIGHT>?
+        if idz == 0:
+               if (any(x in tempNodeStr for x in blueInst) or any(x in tempNodeStr for x in redInst) or any(x in tempNodeStr for x in greyInst)):
+                    if splitStr[idz] == "eax":
+                        for ido, k in enumerate(EAX):
+                            datG.edge(k, tempNodeStr, label=''+'(eax)'+str(ido))
+                    elif splitStr[idz] == "ax":
+                        for ido, k in enumerate(EAX[2:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(ax)'+str(ido))
+                    elif splitStr[idz] == "ah":
+                        for ido, k in enumerate(EAX[2:3]):
+                            datG.edge(k, tempNodeStr, label=''+'(ah)'+str(ido))
+                    elif splitStr[idz] == "al":
+                        for ido, k in enumerate(EAX[3:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(al)'+str(ido))
+                    #Ecx edges 
+                    elif splitStr[idz] == "ecx":
+                        for ido, k in enumerate(ECX):
+                            datG.edge(k, tempNodeStr, label=''+'(ecx)'+str(ido))
+                    elif splitStr[idz] == "cx":
+                        for ido, k in enumerate(ECX[2:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(cx)'+str(ido))
+                    elif splitStr[idz] == "ch":
+                        for ido, k in enumerate(ECX[2:3]):
+                            datG.edge(k, tempNodeStr, label=''+'(ch)'+str(ido))
+                    elif splitStr[idz] == "cl":
+                        for ido, k in enumerate(ECX[3:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(cl)'+str(ido))
+                    #
+                    #Edx edges 
+                    elif splitStr[idz] == "edx":
+                        for ido, k in enumerate(EDX):
+                            datG.edge(k, tempNodeStr, label=''+'(edx)'+str(ido))
+                    elif splitStr[idz] == "dx":
+                        for ido, k in enumerate(EDX[2:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(dx)'+str(ido))
+                    elif splitStr[idz] == "dh":
+                        for ido, k in enumerate(EDX[2:3]):
+                            datG.edge(k, tempNodeStr, label=''+'(dh)'+str(ido))
+                    elif splitStr[idz] == "dl":
+                        for ido, k in enumerate(EDX[3:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(dl)'+str(ido))
+                    #
+                    #Ebx edges 
+                    elif splitStr[idz] == "ebx":
+                        for ido, k in enumerate(EBX):
+                            datG.edge(k, tempNodeStr, label=''+'(ebx)'+str(ido))
+                    elif splitStr[idz] == "bx":
+                        for ido, k in enumerate(EBX[2:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(bx)'+str(ido))
+                    elif splitStr[idz] == "bh":
+                        for ido, k in enumerate(EBX[2:3]):
+                            datG.edge(k, tempNodeStr, label=''+'(bh)'+str(ido))
+                    elif splitStr[idz] == "bl":
+                        for ido, k in enumerate(EBX[3:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(bl)'+str(ido))
+                    #esp edges
+                    elif splitStr[idz] == "esp":
+                        for ido, k in enumerate(ESP):
+                            datG.edge(k, tempNodeStr, label=''+'(esp)'+str(ido))
+                    elif splitStr[idz] == "sp":
+                        for ido, k in enumerate(ESP[2:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(sp)'+str(ido))
+                    #
+                    #ebp edges
+                    elif splitStr[idz] == "ebp":
+                        for ido, k in enumerate(EBP):
+                            datG.edge(k, tempNodeStr, label=''+'(ebp)'+str(ido))
+                    elif splitStr[idz] == "bp":
+                        for ido, k in enumerate(EBP[2:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(bp)'+str(ido))
+                    #
+                    #esi edges
+                    elif splitStr[idz] == "esi":
+                        for ido, k in enumerate(ESI):
+                            datG.edge(k, tempNodeStr, label=''+'(esi)'+str(ido))
+                    elif splitStr[idz] == "si":
+                        for ido, k in enumerate(ESI[2:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(si)'+str(ido))
+                    #
+                    #
+                    elif splitStr[idz] == "edi":
+                        for ido, k in enumerate(EDI):
+                            datG.edge(k, tempNodeStr, label=''+'(edi)'+str(ido))
+                    elif splitStr[idz] == "di":
+                        for ido, k in enumerate(EDI[2:4]):
+                            datG.edge(k, tempNodeStr, label=''+'(di)'+str(ido))
+                    #
+                    else:
+                        if splitStr[idz] in (memAddressDict.keys()):
+                            datG.edge(memAddressDict[splitStr[idz]], tempNodeStr, label=memAddressDict[splitStr[idz]]+'(mem)'+str(1))
+                        else:
+                            datG.edge('R', tempNodeStr, label=''+'(imm)'+str(1))          
 
 
         #input edges , cmp has for each argument passed in (a AND b) as 2 sources
@@ -500,7 +628,7 @@ for idx, c in enumerate(instrEdges):
 
         # orange/gold/green Modify 1 one source
         if idz == 0:
-                if ((any(x in tempNodeStr for x in orangeInst)) or (any(x in tempNodeStr for x in goldInst)) or (any(x in tempNodeStr for x in greenInst))):
+                if ((any(x in tempNodeStr for x in orangeInst)) or (any(x in tempNodeStr for x in goldInst)) or (any(x in tempNodeStr for x in greenInst)) or (any(x in tempNodeStr for x in purpInst))):
                     # if dest reg is eax
                     if splitStr[idz] == "eax":
                         modifyEAX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
@@ -561,6 +689,19 @@ for idx, c in enumerate(instrEdges):
                         modifyEDI(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
                     elif splitStr[idz] == "di":
                         modifyDI(nodes[idx],nodes[idx])
+                    else:
+                        if splitStr[idz] in (memAddressDict.keys()):
+                            memAddressDict[splitStr[idz]] = nodes[idx]
+        if idz == 0:
+               if (any(x in tempNodeStr for x in blueInst) or any(x in tempNodeStr for x in redInst) or any(x in tempNodeStr for x in tealInst) or any(x in tempNodeStr for x in greyInst)):
+                    if (any(x in tempNodeStr for x in blueInst) or any(x in tempNodeStr for x in tealInst)):
+                        modifyESP(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+                    elif (any(x in tempNodeStr for x in greyInst)):
+                        modifyEAX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+                        modifyEDX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
+                    #if must be redInst
+                    elif (any(x in tempNodeStr for x in redInst)):
+                        modifyEAX(nodes[idx],nodes[idx],nodes[idx],nodes[idx])
                     else:
                         if splitStr[idz] in (memAddressDict.keys()):
                             memAddressDict[splitStr[idz]] = nodes[idx]
@@ -629,7 +770,14 @@ for idx, c in enumerate(instrEdges):
             if "sub" in tempNodeStr:
                 statusFlags = ['CF', 'OF', 'SF', 'ZF', 'AF', 'PF']
             if "or" in tempNodeStr:
-                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'PF']
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'PF']            
+            if "dec" in tempNodeStr:
+                statusFlags = ['AF', 'OF', 'SF', 'ZF', 'PF']
+            if "mul" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'AF', 'PF']
+            if "div" in tempNodeStr:
+                statusFlags = ['CF', 'OF', 'SF', 'ZF', 'AF', 'PF']
+            #
             # if instr takes flag as input then put if statement for it under here
             #FlagRegList = [0newestOF, 1newestSF, 2newestZF, 3newestAF, 4newestCF, 5newestPF]
             if "sbb" in tempNodeStr:
@@ -644,8 +792,26 @@ for idx, c in enumerate(instrEdges):
                 datG.edge(FlagRegList[4], tempNodeStr, label='(' + 'CF' +')')
                 #datG.edge(FlagRegList[4], tempNodeStr, label=FlagRegList[4] + '(' + str(nodeEdgesDict[FlagRegList[4]])+ ', CF' +')')
             if "cmovz" in tempNodeStr:
-                datG.edge(FlagRegList[4], tempNodeStr, label='(' + 'ZF' +')')
+                datG.edge(FlagRegList[2], tempNodeStr, label='(' + 'ZF' +')')
                 #datG.edge(FlagRegList[2], tempNodeStr, label=FlagRegList[2] + '(' + str(nodeEdgesDict[FlagRegList[2]])+ ', ZF' +')')
+            if "cmovb" in tempNodeStr:
+                datG.edge(FlagRegList[4], tempNodeStr, label='(' + 'CF' +')')
+            if "cmovbe" in tempNodeStr:
+                datG.edge(FlagRegList[2], tempNodeStr, label='(' + 'ZF' +')')
+                #datG.edge(FlagRegList[2], tempNodeStr, label=FlagRegList[2] + '(' + str(nodeEdgesDict[FlagRegList[2]])+ ', ZF' +')')
+                datG.edge(FlagRegList[4], tempNodeStr, label='(' + 'CF' +')')
+            #should cmovnbe be an AND? this might be a bug
+            if "cmovnbe" in tempNodeStr:
+                datG.edge(FlagRegList[2], tempNodeStr, label='(' + 'ZF' +')')
+                #datG.edge(FlagRegList[2], tempNodeStr, label=FlagRegList[2] + '(' + str(nodeEdgesDict[FlagRegList[2]])+ ', ZF' +')')
+                datG.edge(FlagRegList[4], tempNodeStr, label='(' + 'CF' +')')
+            if "cmovnz" in tempNodeStr:
+                datG.edge(FlagRegList[2], tempNodeStr, label='(' + 'ZF' +')')
+            if "cmovs" in tempNodeStr:
+                datG.edge(FlagRegList[1], tempNodeStr, label='(' + 'SF' +')')
+            if "setnz" in tempNodeStr:
+                datG.edge(FlagRegList[2], tempNodeStr, label='(' + 'ZF' +')')
+
 
 
 add_nodes(datG)
