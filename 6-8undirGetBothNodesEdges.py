@@ -8,12 +8,12 @@ bad_words = [ 'jns', 'js', 'jnz', 'jz', 'jno', 'jo', 'jbe', 'jb', 'jle', 'jl', '
 instrEdges = []
 instrNodes = []
 
-#fileName = 'smallCleanedSlice.txt'
-fileName = '200CleanedSlice.txt'
-#outFileName = 'smallUndirOutputGraph.txt'
-outFileName = '200UndirOutputGraph.txt'
-#renderFileName = 'test-output/smallUndirDataFlowSliceWes.gv'
-renderFileName = 'test-output/200UndirDataFlowSliceWes.gv'
+fileName = 'smallCleanedNewSlice.txt'
+#fileName = '200CleanedSlice.txt'
+outFileName = 'smallUndirOutputGraph.txt'
+#outFileName = '200UndirOutputGraph.txt'
+renderFileName = 'test-output/smallUndirDataFlowSliceWes.gv'
+#renderFileName = 'test-output/200UndirDataFlowSliceWes.gv'
 
 k = 1 
 #get the nodes with their appropraite line numbers
