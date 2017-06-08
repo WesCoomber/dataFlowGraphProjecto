@@ -8,16 +8,24 @@ bad_words = [ 'jns', 'js', 'jnz', 'jz', 'jno', 'jo', 'jbe', 'jb', 'jle', 'jl', '
 instrEdges = []
 instrNodes = []
 
-fileName = 'smallCleanedSlice.txt'
-outFileName = 'smallUndirOutputGraph.txt'
-renderFileName = 'test-output/smallUndirDataFlowSliceWes.gv'
+#fileName = 'smallCleanedSlice.txt'
+fileName = '200CleanedSlice.txt'
+#outFileName = 'smallUndirOutputGraph.txt'
+outFileName = '200UndirOutputGraph.txt'
+#renderFileName = 'test-output/smallUndirDataFlowSliceWes.gv'
+renderFileName = 'test-output/200UndirDataFlowSliceWes.gv'
 
+k = 1 
+#get the nodes with their appropraite line numbers
 with open(fileName) as oldfile:
     for line in oldfile:
         tempLine = line.split()
         print(tempLine)
         if (len(tempLine)) >= 2 and tempLine[0] != '[SLICE_ADDRESSING]':
-            instrNodes.append(tempLine[1] + '-' + tempLine[2])
+            instrNodes.append('[' +str (k) + '] '+tempLine[1] + '-' + tempLine[2])
+            k = k + 1 
+        if(tempLine[0] == '[SLICE_ADDRESSING]'):
+            k = k + 1
 
 i=0
 for x in instrNodes:
@@ -85,8 +93,8 @@ print(len(instrEdges))
 #print(instrEdges)
 
 #add line number to node names
-for idx, s in enumerate(instrNodes):
-    instrNodes[idx] = '[' +str (idx) + '] ' + s
+#for idx, s in enumerate(instrNodes):
+#    instrNodes[idx] = '[' +str (idx) + '] ' + s
 
 nodeEdgesDict = {k: v for k, v in zip(instrNodes, instrEdges)}
 #example dictionary entry is dict1['0-cmp': 'eax, 0xfffff001']
