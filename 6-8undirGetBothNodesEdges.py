@@ -84,11 +84,14 @@ print('Done! Instruction Edges List size is : ')
 print(len(instrEdges))
 #print(instrEdges)
 
+#add line number to node names
+for idx, s in enumerate(instrNodes):
+    instrNodes[idx] = '[' +str (idx) + '] ' + s
 
 nodeEdgesDict = {k: v for k, v in zip(instrNodes, instrEdges)}
 #example dictionary entry is dict1['0-cmp': 'eax, 0xfffff001']
 print('Done! Dict (LineNumber-Instruction: Edges) is : ')
-print("first node(instr): and its edges(operands): " + 'b7ff5c05-cmp: '+str(nodeEdgesDict['b7ff5c05-cmp']))
+#rint("first node(instr): and its edges(operands): " + 'b7ff5c05-cmp: '+str(nodeEdgesDict['b7ff5c05-cmp']))
 
 flagEnterKeys = 1
 
@@ -444,7 +447,8 @@ for idx, c in enumerate(instrEdges):
                     #
                     else:
                         if splitStr[idz] in (memAddressDict.keys()):
-                            datG.edge(memAddressDict[splitStr[idz]], tempNodeStr, label=memAddressDict[splitStr[idz]]+'(mem)'+str(1))
+                            for i in range(4):
+                                datG.edge(memAddressDict[splitStr[idz]], tempNodeStr, label=memAddressDict[splitStr[idz]]+'(mem)'+str(i))
                         else:
                             pass
                             #datG.edge('R', tempNodeStr, label= k +'(imm)'+str(1))   
@@ -539,7 +543,8 @@ for idx, c in enumerate(instrEdges):
                     #
                     else:
                         if splitStr[idz] in (memAddressDict.keys()):
-                            datG.edge(memAddressDict[splitStr[idz]], tempNodeStr, label=memAddressDict[splitStr[idz]]+'(mem)'+str(1))
+                            for i in range(4):
+                                datG.edge(memAddressDict[splitStr[idz]], tempNodeStr, label=memAddressDict[splitStr[idz]]+'(mem)'+str(i))
                         else:
                             datG.edge('R', tempNodeStr, label= k +'(imm)'+str(1))          
 
@@ -634,7 +639,8 @@ for idx, c in enumerate(instrEdges):
             #
             else:
                 if splitStr[idz] in (memAddressDict.keys()):
-                    datG.edge(memAddressDict[splitStr[idz]], tempNodeStr, label=memAddressDict[splitStr[idz]]+'(mem)'+str(2))
+                    for i in range(4):
+                        datG.edge(memAddressDict[splitStr[idz]], tempNodeStr, label=memAddressDict[splitStr[idz]]+'(mem)'+str(i))
                 else:
                     pass
                     #datG.edge('R', tempNodeStr, label=''+'(imm)'+str(2))    
