@@ -122,7 +122,9 @@ graph = functools.partial(gv.Graph, format='svg')
 digraph = functools.partial(gv.Digraph, format='svg')
 
 datG = graph()
+#list of nodes in the format ['[1] b7ff5c05-cmp', '[2] b7fe3d14-cmp']
 nodes = instrNodes
+#list of edges in the format ['eax, 0xfffff001', 'eax, 0x33']
 edges = instrEdges
 
 #This block of code is hacky way to get rid of duplicates in memAddressList
@@ -362,7 +364,6 @@ for idx, c in enumerate(instrEdges):
     for idz, b in enumerate(splitStr):
         tempNodeStr = instrNodes[(idx)]
 
-        print('splitStrZ ' + str(idz) + ' ' + str(b))
         #input edges for orangeInstructions, such as 'mov' they only have one 1 source(second arg)         
         if idz == 1:
                 if any(x in tempNodeStr for x in orangeInst):
